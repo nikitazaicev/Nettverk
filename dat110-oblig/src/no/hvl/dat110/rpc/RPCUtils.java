@@ -1,5 +1,6 @@
 package no.hvl.dat110.rpc;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class RPCUtils {
@@ -91,9 +92,15 @@ public class RPCUtils {
 
 		int decoded;
 		// TODO: unmarshall integer contained in data
-		String s = unmarshallString(data);
+		byte[] dekodet = new byte[4];
 		
-		decoded = Integer.parseInt(s);
+		for(int i = 0; i<data.length;i++) {
+		dekodet[i]=data[i+1];	
+		}
+		ByteBuffer bf = ByteBuffer.allocate(4);
+		bf.put(dekodet);
+		int tall = bf.getInt();
+		decoded = tall;
 		
 		return decoded;
 
