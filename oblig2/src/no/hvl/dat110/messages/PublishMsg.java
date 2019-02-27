@@ -2,7 +2,6 @@ package no.hvl.dat110.messages;
 
 public class PublishMsg extends Message {
 	
-	String user;
 	String topic;
 	String message;
 	
@@ -10,7 +9,7 @@ public class PublishMsg extends Message {
 		super();
 	}
 	public PublishMsg(String user, String topic, String message) {
-		this.user = user;
+		super(MessageType.PUBLISH, user);
 		this.topic = topic;
 		this.message = message;
 	}
@@ -24,13 +23,6 @@ public class PublishMsg extends Message {
 	public void setTopic(String topic) {
 		this.topic = topic;
 	}
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
 
 	public String getTopic() {
 		return topic;
@@ -39,7 +31,7 @@ public class PublishMsg extends Message {
 
 	@Override
 	public String toString() {
-		return "SubscribeTopicMsg [user=" + user + ", topic=" + topic + ", message ="+ message+"]";
+		return "SubscribeTopicMsg [topic=" + topic + ", message ="+ message+"]";
 	}
 	
 	// TODO: 

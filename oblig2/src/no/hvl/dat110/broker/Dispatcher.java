@@ -144,8 +144,6 @@ public class Dispatcher extends Stopable {
 		Logger.log("onPublish:" + msg.toString());
 
 		// TODO: publish the message to clients subscribed to the topic
-		
-		throw new RuntimeException("not yet implemented");
-		
+		storage.getSubscribers(msg.getTopic()).forEach(x -> storage.getSession(x).send(msg));
 	}
 }
