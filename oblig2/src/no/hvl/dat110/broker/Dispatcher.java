@@ -2,6 +2,8 @@ package no.hvl.dat110.broker;
 
 import java.util.Set;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import no.hvl.dat110.common.Logger;
 import no.hvl.dat110.common.Stopable;
@@ -24,8 +26,9 @@ public class Dispatcher extends Stopable {
 		Collection<ClientSession> clients = storage.getSessions();
 
 		Logger.lg(".");
+		
 		for (ClientSession client : clients) {
-
+			
 			Message msg = null;
 
 			if (client.hasData()) {
@@ -36,13 +39,13 @@ public class Dispatcher extends Stopable {
 				dispatch(client, msg);
 			}
 		}
-
+				
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
+}
 
 	public void dispatch(ClientSession client, Message msg) {
 
@@ -88,29 +91,43 @@ public class Dispatcher extends Stopable {
 
 		Logger.log("onConnect:" + msg.toString());
 
-		storage.addClientSession(user, connection);
+		if (storage.getSession(user) == null && !storage.MsgVent.containsKey(user)) {
+			storage.addClientSession(user, connection);
+		} else if (storage.getSession(user) == null && storage.MsgVent.containsKey(user)) {
+			storage.addClientSession(user, connection);
+			Set<PublishMsg> set = storage.MsgVent.get(user);
+			Iterator<PublishMsg> iter = set.iterator();
+			while (iter.hasNext()) {
+				storage.getSession(user).send(iter.next());
+			}
+		} else if (storage.getSession(user) != null) {
+			return;
+		}
 
 	}
 
-	// called by dispatch upon receiving a disconnect message 
+
+	// called by dispatch upon receiving a disconnect message
 	public void onDisconnect(DisconnectMsg msg) {
 
 		String user = msg.getUser();
 
 		Logger.log("onDisconnect:" + msg.toString());
 
+		// den som er blir removed blir flyttet til VentClient
+		storage.addVentClient(user);
 		storage.removeClientSession(user);
-
+		
 	}
 
 	public void onCreateTopic(CreateTopicMsg msg) {
 
 		Logger.log("onCreateTopic:" + msg.toString());
 
-		// TODO: create the topic in the broker storage 
-		
+		// TODO: create the topic in the broker storage
+
 		storage.createTopic(msg.getTopic());
-		
+
 	}
 
 	public void onDeleteTopic(DeleteTopicMsg msg) {
@@ -118,6 +135,7 @@ public class Dispatcher extends Stopable {
 		Logger.log("onDeleteTopic:" + msg.toString());
 
 		// TODO: delete the topic from the broker storage
+
 		storage.deleteTopic(msg.getTopic());
 	}
 
@@ -126,7 +144,7 @@ public class Dispatcher extends Stopable {
 		Logger.log("onSubscribe:" + msg.toString());
 
 		// TODO: subscribe user to the topic
-		
+
 		storage.addSubscriber(msg.getUser(), msg.getTopic());
 	}
 
@@ -135,7 +153,7 @@ public class Dispatcher extends Stopable {
 		Logger.log("onUnsubscribe:" + msg.toString());
 
 		// TODO: unsubscribe user to the topic
-		
+
 		storage.removeSubscriber(msg.getUser(), msg.getTopic());
 	}
 
@@ -144,6 +162,13 @@ public class Dispatcher extends Stopable {
 		Logger.log("onPublish:" + msg.toString());
 
 		// TODO: publish the message to clients subscribed to the topic
-		storage.getSubscribers(msg.getTopic()).forEach(x -> storage.getSession(x).send(msg));
+
+		storage.getSubscribers(msg.getTopic()).stream().filter(x -> storage.getSession(x) != null)
+				.forEach(x -> storage.getSession(x).send(msg));
+
+		// lagrer meldinger som skal sendes til disconnecede brukere
+		storage.getSubscribers(msg.getTopic()).stream().filter(x -> storage.getSession(x) == null)
+				.filter(x -> storage.MsgVent.get(x) != null).forEach(x -> storage.MsgVent.get(x).add(msg));
+
 	}
 }

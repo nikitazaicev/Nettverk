@@ -5,16 +5,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import no.hvl.dat110.messages.PublishMsg;
 import no.hvl.dat110.messagetransport.Connection;
 
 public class Storage {
 
 	protected ConcurrentHashMap<String, Set<String>> subscriptions;
 	protected ConcurrentHashMap<String, ClientSession> clients;
-
+	protected ConcurrentHashMap<String, Set<PublishMsg>> MsgVent;
+	
 	public Storage() {
 		subscriptions = new ConcurrentHashMap<String, Set<String>>();
 		clients = new ConcurrentHashMap<String, ClientSession>();
+		MsgVent = new ConcurrentHashMap<String, Set<PublishMsg>>();
 	}
 
 	public Collection<ClientSession> getSessions() {
@@ -49,10 +52,18 @@ public class Storage {
 
 	}
 
+	public void addVentClient(String user) {
+		Set<PublishMsg> set = new HashSet<PublishMsg>();
+		MsgVent.put(user, set);
+
+	}
+	
 	public void removeClientSession(String user) {
 
 		// TODO: remove client session for user from the storage
+
 		clients.remove(user);
+	
 	}
 
 	public void createTopic(String topic) {
@@ -66,9 +77,10 @@ public class Storage {
 	}
 
 	public void addSubscriber(String user, String topic) {
-
+		Set<String> set = subscriptions.get(topic);
+		if(set != null) {
 		subscriptions.get(topic).add(user);
-		
+		}
 	}
 
 	public void removeSubscriber(String user, String topic) {
