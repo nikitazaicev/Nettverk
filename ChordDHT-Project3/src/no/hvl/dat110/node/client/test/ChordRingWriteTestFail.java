@@ -72,18 +72,34 @@ class ChordRingWriteTestFail {
 	@Test
 	void test() throws RemoteException, InterruptedException {
 		// test quorum-based consistency protocol
-		// acquire read/write locks for 5 processes (N=10) we need N/2 + 1 to get permission
+		// acquire read/write locks for 9 processes (N=10) we need N/2 + 1 to get permission
+		// Here we don't know the number of replicas for a particular file. The minimum is 1
+		// with 1 replica to a file, we need 1 replica to give permission
 		p1.acquireLock();
 		p2.acquireLock();
 		p3.acquireLock();
 		p4.acquireLock();
 		p5.acquireLock();
+		p6.acquireLock();
+		p7.acquireLock();
+		p8.acquireLock();
+		p9.acquireLock();
 		
-		NodeClientWriter w = new NodeClientWriter("12345test", "process1");	// request to write 12345test into the file named process4
+		NodeClientWriter w = new NodeClientWriter("12345test", "process4");	// request to write 12345test into the file named process4
 		w.start();
 		w.join();
+		
+		p1.releaseLocks();
+		p2.releaseLocks();
+		p3.releaseLocks();
+		p4.releaseLocks();
+		p5.releaseLocks();
+		p6.releaseLocks();
+		p7.releaseLocks();
+		p8.releaseLocks();
+		p6.releaseLocks();
 		Assertions.assertTrue(w.isSucceed()); 									// test must fail as this should return false (should not get the majority vote)
-
+		
 	}
 
 }
