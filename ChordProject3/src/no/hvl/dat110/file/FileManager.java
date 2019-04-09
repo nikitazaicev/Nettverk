@@ -170,7 +170,7 @@ public class FileManager extends Thread {
 
 		// send a request to a node and get the voters decision
 		
-		boolean result = chordnode.requestReadOperation(message);
+		boolean result = node.requestReadOperation(message);
 
 		// put the decision back in the message
 		
