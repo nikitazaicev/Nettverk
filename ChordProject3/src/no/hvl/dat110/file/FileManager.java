@@ -166,7 +166,7 @@ public class FileManager extends Thread {
 
 		// set the NodeIP in the message (replace ip with )
 		
-		message.setNodeIP(chordnode.getNodeIP());
+		message.setNodeIP(node.getNodeIP());
 
 		// send a request to a node and get the voters decision
 		
@@ -238,11 +238,11 @@ public class FileManager extends Thread {
 
 		// set the NodeIP in the message (replace ip with )
 		
-		message.setNodeIP(chordnode.getNodeIP());
+		message.setNodeIP(node.getNodeIP());
 
 		// send a request to a node and get the voters decision
 		
-		boolean result = chordnode.requestWriteOperation(message);
+		boolean result = node.requestWriteOperation(message);
 
 		// put the decision back in the message
 

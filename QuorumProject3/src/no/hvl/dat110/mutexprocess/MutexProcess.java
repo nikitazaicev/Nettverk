@@ -164,9 +164,7 @@ public class MutexProcess extends UnicastRemoteObject implements ProcessInterfac
 		incrementclock();
 		// Hint: for all 3 cases, use Message to send GRANT or DENY. e.g. message.setAcknowledgement(true) = GRANT
 		
-		Message reply= new Message();
-		reply.setProcessStubName(procStubname);
-		reply.setClock(counter);
+		Message reply=message;
 		/**
 		 *  case 1: Receiver is not accessing shared resource and does not want to: GRANT, acquirelock and reply
 		 */

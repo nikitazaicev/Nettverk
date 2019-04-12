@@ -364,23 +364,20 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 				incrementclock();
 				// Hint: for all 3 cases, use Message to send GRANT or DENY. e.g. message.setAcknowledgement(true) = GRANT
 				
-				Message reply= new Message();
-				reply.setNodeIP(nodeIP);
-				reply.setNodeID(nodeID);
-				reply.setClock(counter);
+			
 				/**
 				 *  case 1: Receiver is not accessing shared resource and does not want to: GRANT, acquirelock and reply
 				 */
 				if(!WANTS_TO_ENTER_CS&&!CS_BUSY) {
-					reply.setAcknowledged(true);
+					message.setAcknowledged(true);
 					acquireLock();
-					return reply;
+					return message;
 				/**
 				 *  case 2: Receiver already has access to the resource: DENY and reply
 				 */
 				}else if(CS_BUSY) {
-					reply.setAcknowledged(false);
-					return reply;	
+					message.setAcknowledged(false);
+					return message;	
 				
 				
 				/**
@@ -389,9 +386,9 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 				 */
 				}else if(WANTS_TO_ENTER_CS) {
 					if(counter>message.getClock()) {
-						reply.setAcknowledged(true);
+						message.setAcknowledged(true);
 						acquireLock();
-						return reply;
+						return message;
 					}
 					
 				}
