@@ -27,18 +27,7 @@ public class Dispatcher extends Stopable {
 
 		Logger.lg(".");
 		
-		for (ClientSession client : clients) {
-			
-			Message msg = null;
 
-			if (client.hasData()) {
-				msg = client.receive();
-			}
-
-			if (msg != null) {
-				dispatch(client, msg);
-			}
-		}
 				
 		try {
 			Thread.sleep(1000);
@@ -47,7 +36,7 @@ public class Dispatcher extends Stopable {
 		}
 }
 
-	public void dispatch(ClientSession client, Message msg) {
+	public  void dispatch(ClientSession client, Message msg) {
 
 		MessageType type = msg.getType();
 
@@ -93,10 +82,14 @@ public class Dispatcher extends Stopable {
 
 		if (storage.getSession(user) == null && !storage.MsgVent.containsKey(user)) {
 			storage.addClientSession(user, connection);
+			storage.getSession(user).setDispatcher(this);
+			storage.getSession(user).start();
 		} else if (storage.getSession(user) == null && storage.MsgVent.containsKey(user)) {
 			storage.addClientSession(user, connection);
 			Set<PublishMsg> set = storage.MsgVent.get(user);
 			Iterator<PublishMsg> iter = set.iterator();
+			storage.getSession(user).setDispatcher(this);
+			storage.getSession(user).start();
 			while (iter.hasNext()) {
 				storage.getSession(user).send(iter.next());
 			}
@@ -108,7 +101,7 @@ public class Dispatcher extends Stopable {
 
 
 	// called by dispatch upon receiving a disconnect message
-	public void onDisconnect(DisconnectMsg msg) {
+	public  void onDisconnect(DisconnectMsg msg) {
 
 		String user = msg.getUser();
 
@@ -116,11 +109,15 @@ public class Dispatcher extends Stopable {
 
 		// den som er blir removed blir flyttet til VentClient
 		storage.addVentClient(user);
+
+		storage.getSession(user).doStop();
+			
+	
 		storage.removeClientSession(user);
 		
 	}
 
-	public void onCreateTopic(CreateTopicMsg msg) {
+	public  void onCreateTopic(CreateTopicMsg msg) {
 
 		Logger.log("onCreateTopic:" + msg.toString());
 
@@ -130,7 +127,7 @@ public class Dispatcher extends Stopable {
 
 	}
 
-	public void onDeleteTopic(DeleteTopicMsg msg) {
+	public  void onDeleteTopic(DeleteTopicMsg msg) {
 
 		Logger.log("onDeleteTopic:" + msg.toString());
 
@@ -139,7 +136,7 @@ public class Dispatcher extends Stopable {
 		storage.deleteTopic(msg.getTopic());
 	}
 
-	public void onSubscribe(SubscribeMsg msg) {
+	public  void onSubscribe(SubscribeMsg msg) {
 
 		Logger.log("onSubscribe:" + msg.toString());
 
@@ -148,7 +145,7 @@ public class Dispatcher extends Stopable {
 		storage.addSubscriber(msg.getUser(), msg.getTopic());
 	}
 
-	public void onUnsubscribe(UnsubscribeMsg msg) {
+	public  void onUnsubscribe(UnsubscribeMsg msg) {
 
 		Logger.log("onUnsubscribe:" + msg.toString());
 

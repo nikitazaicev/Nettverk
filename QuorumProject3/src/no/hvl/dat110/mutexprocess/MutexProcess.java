@@ -85,7 +85,6 @@ public class MutexProcess extends UnicastRemoteObject implements ProcessInterfac
 		// release your lock variables and logical clock update
 		CS_BUSY=false;
 		WANTS_TO_ENTER_CS=false;
-		incrementclock();
 	}
 	
 	public boolean requestWriteOperation(Message message) throws RemoteException {
@@ -130,7 +129,7 @@ public class MutexProcess extends UnicastRemoteObject implements ProcessInterfac
 		// multicast message to N/2 + 1 processes (random processes) - block until feedback is received
 		synchronized(queueACK){
 		queueACK.clear();
-			for(int i=0; i<replicas.size(); i++) {
+			for(int i=0; i<quorum; i++) {
 		
 			String stub = replicas.get(i);
 			
@@ -190,6 +189,9 @@ public class MutexProcess extends UnicastRemoteObject implements ProcessInterfac
 				reply.setAcknowledged(true);
 				acquireLock();
 				return reply;
+			}else {
+				reply.setAcknowledged(false);
+				return reply;
 			}
 			
 		}
@@ -212,7 +214,7 @@ public class MutexProcess extends UnicastRemoteObject implements ProcessInterfac
 				n++;
 			}
 		}
-				
+		queueACK.clear();	
 		return y>n;			// change this to the result of the vote
 	}
 

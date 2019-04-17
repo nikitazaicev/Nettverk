@@ -289,7 +289,6 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 	public void releaseLocks() throws RemoteException {
 		CS_BUSY = false;
 		WANTS_TO_ENTER_CS = false;
-		incrementclock();
 	}
 	
 	public boolean requestWriteOperation(Message message) throws RemoteException {
@@ -339,7 +338,7 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 	
 		synchronized(queueACK){
 			queueACK.clear();
-			for(int i=0;i<replicas.size();i++) {
+			for(int i=0;i<replicas.size()/2+1;i++) {
 			String nodeip = replicas.get(i).getNodeIP();
 			String nodeid = replicas.get(i).getNodeID().toString();
 			try {
@@ -389,6 +388,9 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 						message.setAcknowledged(true);
 						acquireLock();
 						return message;
+					}else {
+						message.setAcknowledged(false);
+						return message;
 					}
 					
 				}
@@ -412,7 +414,7 @@ public class Node extends UnicastRemoteObject implements ChordNodeInterface {
 				n++;
 			}
 		}
-				
+		queueACK.clear();
 		return y>n;		// change this to the result of the vote
 	}
 
