@@ -45,6 +45,37 @@ public class App {
 		
 		// TODO: implement the routes required for the access control service
 		
+		post("/accessdevice/log", (req, res) -> {
+			
+			String message = req.body();
+			
+		 	int id = accesslog.add(message);
+		 	
+		 	Gson gson = new Gson();
+		 	res.body(gson.toJson(accesslog.get(id),AccessEntry.class));
+		 	return res;
+		
+		
+		});
+		
+		get("/accessdevice/log", (req, res) -> {
+		 	Gson gson = new Gson();
+		 	
+		 	return gson.toJson(accesslog,AccessLog.class);
+		});
+		
+		get("/accessdevice/log/{id}", (req, res) -> {
+		 	
+			int id = Integer.parseInt(req.attribute("id"));
+			
+			Gson gson = new Gson();
+		 	
+		 	return gson.toJson(accesslog.get(id),AccessLog.class);
+		
+		});
+		
+		
+		
     }
     
 }
