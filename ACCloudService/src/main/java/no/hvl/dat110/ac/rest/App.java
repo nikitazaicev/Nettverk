@@ -48,12 +48,13 @@ public class App {
 		post("/accessdevice/log", (req, res) -> {
 			
 			String message = req.body();
-			
-		 	int id = accesslog.add(message);
+			Gson gson = new Gson();
 		 	
-		 	Gson gson = new Gson();
-		 	res.body(gson.toJson(accesslog.get(id),AccessEntry.class));
-		 	return res;
+			int id = accesslog.add(message);
+		 	message = gson.toJson(accesslog.get(id),AccessEntry.class);
+		 	res.body(message);
+		 	
+		 	return message;
 		
 		
 		});
@@ -64,17 +65,46 @@ public class App {
 		 	return gson.toJson(accesslog,AccessLog.class);
 		});
 		
-		get("/accessdevice/log/{id}", (req, res) -> {
+		get("/accessdevice/log/:id", (req, res) -> {
 		 	
-			int id = Integer.parseInt(req.attribute("id"));
+			int id = Integer.parseInt(req.params(":id"));
 			
 			Gson gson = new Gson();
-		 	
-		 	return gson.toJson(accesslog.get(id),AccessLog.class);
+		 
+		 	return gson.toJson(accesslog.get(id),AccessEntry.class);
 		
 		});
 		
+		put("/accessdevice/code", (req, res) -> {
+				
+			Gson gson = new Gson();
+			
+			accesscode = gson.fromJson(req.body(), AccessCode.class);
+			String ac = gson.toJson(accesscode,AccessCode.class);
+			res.body(ac);
+
+			return ac;
 		
+		});
+		
+		get("/accessdevice/code", (req, res) -> {
+			
+			Gson gson = new Gson();		
+			 
+		 	return gson.toJson(accesscode, AccessCode.class);
+		
+		});
+		delete("/accessdevice/code", (req, res) -> {
+			
+			Gson gson = new Gson();
+			
+			accesslog.clear();
+			String log = gson.toJson(accesslog,AccessLog.class);
+			res.body(log);
+			
+		 	return log;
+		
+		});
 		
     }
     
