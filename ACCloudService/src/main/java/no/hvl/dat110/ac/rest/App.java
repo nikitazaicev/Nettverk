@@ -47,14 +47,16 @@ public class App {
 		
 		post("/accessdevice/log", (req, res) -> {
 			
-			String message = req.body();
+			String body = req.body();
 			Gson gson = new Gson();
+			AccessMessage am = gson.fromJson(body, AccessMessage.class);
+			String message = am.getMessage();
+			
+		 	AccessEntry ae = accesslog.get(accesslog.add(message));
+		 	body = gson.toJson(ae,AccessEntry.class);
+		 	res.body(body);
 		 	
-			int id = accesslog.add(message);
-		 	message = gson.toJson(accesslog.get(id),AccessEntry.class);
-		 	res.body(message);
-		 	
-		 	return message;
+		 	return body;
 		
 		
 		});
@@ -94,7 +96,7 @@ public class App {
 		 	return gson.toJson(accesscode, AccessCode.class);
 		
 		});
-		delete("/accessdevice/code", (req, res) -> {
+		delete("/accessdevice/log", (req, res) -> {
 			
 			Gson gson = new Gson();
 			
